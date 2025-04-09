@@ -1,4 +1,4 @@
-package com.francisco.trms.security;
+package com.francisco.trms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
