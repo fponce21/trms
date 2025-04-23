@@ -1,68 +1,35 @@
 package com.francisco.trms.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "reimbursement_requests")
+@Getter
+@Setter
 public class ReimbursementRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
-	private String employeeName;
-	private String eventType;
-	private Double amountRequested;
-	private String status;
+    @Column(nullable = false)
+    private Double amount;
 
-	public ReimbursementRequest() {
-	}
+    @Column(nullable = false)
+    private String description;
 
-	public ReimbursementRequest(String employeeName, String eventType, Double amountRequested, String status) {
-		this.employeeName = employeeName;
-		this.eventType = eventType;
-		this.amountRequested = amountRequested;
-		this.status = status;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getEmployeeName() {
-		return employeeName;
-	}
-
-	public void setEmployeeName(String employeeName) {
-		this.employeeName = employeeName;
-	}
-
-	public String getEventType() {
-		return eventType;
-	}
-
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
-
-	public Double getAmountRequested() {
-		return amountRequested;
-	}
-
-	public void setAmountRequested(Double amountRequested) {
-		this.amountRequested = amountRequested;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
+    @Column(nullable = false)
+    private String status;
 }

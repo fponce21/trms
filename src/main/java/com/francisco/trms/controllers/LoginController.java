@@ -1,13 +1,49 @@
 package com.francisco.trms.controllers;
 
-import org.springframework.stereotype.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import com.francisco.trms.models.Users;
+import com.francisco.trms.services.UserService;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/login")
 public class LoginController {
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    @GetMapping("/login")
-    public String showLoginPage() {
-        return "login"; // return the name of the login page view
+    private final UserService userService;
+
+    public LoginController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public ResponseEntity<String> login() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        logger.info("User logged in: {}", username);
+        return ResponseEntity.ok("Logged in as: " + username);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Users> register(@Valid @RequestBody Users user) {
+        logger.info("Registering user: {}", user.getUsername());
+        try {
+            Users savedUser = userService.createUser(user);
+            logger.debug("User registered: {}", savedUser.getUsername());
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        } catch (Exception e) {
+            logger.error("Failed to register user: {}", user.getUsername(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 }
