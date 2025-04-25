@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reimbursements")
@@ -27,22 +28,27 @@ public class ReimbursementController {
 
     @PostMapping
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ResponseEntity<ReimbursementRequestDTO> createReimbursementRequest(
+    public ResponseEntity<?> createReimbursementRequest(
             @Valid @RequestBody ReimbursementRequestDTO requestDTO) {
         logger.info("Creating reimbursement request for userId: {}", requestDTO.getUserId());
         try {
             ReimbursementRequestDTO savedRequest = reimbursementService.createRequest(requestDTO);
             logger.debug("Request created: {}", savedRequest.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(savedRequest);
+        } catch (IllegalArgumentException e) {
+            logger.error("Failed to create request for userId: {}", requestDTO.getUserId(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             logger.error("Failed to create request for userId: {}", requestDTO.getUserId(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Server error: " + e.getMessage()));
         }
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER')")
-    public ResponseEntity<List<ReimbursementRequestDTO>> getAllReimbursements() {
+    public ResponseEntity<?> getAllReimbursements() {
         logger.info("Fetching all reimbursement requests");
         try {
             List<ReimbursementRequestDTO> requests = reimbursementService.getAllRequests();
@@ -50,8 +56,8 @@ public class ReimbursementController {
             return ResponseEntity.ok(requests);
         } catch (Exception e) {
             logger.error("Failed to fetch requests", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Server error: " + e.getMessage()));
         }
     }
 }
-
